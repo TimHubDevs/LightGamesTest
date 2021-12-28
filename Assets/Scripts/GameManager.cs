@@ -8,13 +8,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CardSpawner _cardSpawner;
     [SerializeField] private GameObject _loadingPanel;
 
-    [HideInInspector] 
-    public List<Card> _cards = new List<Card>();
+    [HideInInspector] public List<Card> _cards = new List<Card>();
+    [HideInInspector] public int pairCount;
+    [HideInInspector] public int maxPairCount;
+    public Action onPairCountChange;
 
-    private int pairCount;
     private int _countOpenCard;
     private int _entryCount;
-    private int maxPairCount;
     private bool _isCanGame;
     private string _firstCardName;
     private string _secondCardName;
@@ -33,8 +33,10 @@ public class GameManager : MonoBehaviour
     {
         foreach (var card in _cards)
         {
+            card._cardButton.enabled = false;
+
             StartCoroutine(card.FirstHideFace());
-            
+
             card.onPressCard += () =>
             {
                 CheckCountOpenCard();
@@ -42,13 +44,15 @@ public class GameManager : MonoBehaviour
                 if (!_isCanGame)
                     return;
 
-                card.ShowCardFace();
+                card._cardButton.enabled = false;
+                StartCoroutine(card.ShowCardFace(() =>
+                {
+                    _openCards.Add(card);
 
-                _openCards.Add(card);
+                    FillOpenCardsName(card);
 
-                FillOpenCardsName(card);
-
-                CheckResult();
+                    CheckResult();
+                }));
             };
         }
     }
@@ -71,9 +75,9 @@ public class GameManager : MonoBehaviour
         _cards.Clear();
         _cardSpawner.SpawnCard(_cardsInfo);
         maxPairCount = _cards.Count / 2;
+        onPairCountChange.Invoke();
         SubscribeCard();
         _loadingPanel.SetActive(false);
-        
     }
 
     public void RestartGame()
@@ -138,25 +142,28 @@ public class GameManager : MonoBehaviour
         {
             //win condition
             pairCount++;
-
-            if (pairCount == maxPairCount)
-            {
-                //win
-                pairCount = 0;
-                foreach (var card in _cards)
-                {
-                    Destroy(card.gameObject);
-                }
-
-                RestartGame();
-            }
-
+            onPairCountChange.Invoke();
             foreach (var openCard in _openCards)
             {
-                openCard.DestroySprite();
-            }
+                StartCoroutine(openCard.DestroySprite(() =>
+                {
+                    if (pairCount == maxPairCount)
+                    {
+                        //win
+                        pairCount = 0;
+                        onPairCountChange.Invoke();
 
-            _openCards.Clear();
+                        foreach (var card in _cards)
+                        {
+                            Destroy(card.gameObject);
+                        }
+
+                        RestartGame();
+                    }
+
+                    _openCards.Clear();
+                }));
+            }
         }
         else if (_secondCardName == String.Empty)
         {
@@ -166,7 +173,7 @@ public class GameManager : MonoBehaviour
         {
             foreach (var openCard in _openCards)
             {
-                openCard.HideFace();
+                StartCoroutine(openCard.HideFace());
             }
 
             _openCards.Clear();

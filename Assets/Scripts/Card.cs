@@ -5,13 +5,18 @@ using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
-    [SerializeField] private Button _cardButton;
+    [SerializeField] public Button _cardButton;
     [SerializeField] public Image _image;
+    [SerializeField] public Animator _animator;
     
     public Action onPressCard;
     public string Name;
+    public readonly string RotateCard = "RotateCard";
+    public readonly string ShakeCard = "ShakeCard";
+    public readonly string DestroyCard = "DestroyCard";
     private Sprite _rubashkaSprite;
     private Sprite _faceSprite;
+    
 
     private void Awake()
     {
@@ -30,28 +35,40 @@ public class Card : MonoBehaviour
         _image.sprite = _rubashkaSprite;
     }
     
-    public void ShowCardFace()
+    public IEnumerator ShowCardFace(Action callback)
     {
+        _animator.Play(RotateCard,-1, 0f);
+        yield return new WaitForSeconds(0.5f);
         _image.sprite = _faceSprite;
+        yield return new WaitForSeconds(0.5f);
+        callback.Invoke();
     }
 
-    public void HideFace()
+    public IEnumerator HideFace()
     {
+        _animator.Play(ShakeCard);
+        yield return new WaitForSeconds(1.2f);
+        _animator.Play(RotateCard);
+        yield return new WaitForSeconds(0.5f);
         _image.sprite = _rubashkaSprite;
+        yield return new WaitForSeconds(0.5f);
+        _cardButton.enabled = true;
     }
 
-    public void DestroySprite()
+    public IEnumerator DestroySprite(Action callback)
     {
-        _image.sprite = null;
-        _image.color = new Color(1,1,1,0);
+        _animator.Play(DestroyCard);
+        yield return new WaitForSeconds(1f);
+        gameObject.transform.GetChild(0).gameObject.SetActive(false);
+        yield return new WaitForSeconds(1f);
+        callback.Invoke();
     }
 
     public IEnumerator FirstHideFace()
     {
-        _cardButton.enabled = false;
+        _animator.Play(RotateCard);
         _image.sprite = _faceSprite;
         yield return new WaitForSeconds(5);
-        HideFace();
-        _cardButton.enabled = true;
+        StartCoroutine(HideFace());
     }
 }

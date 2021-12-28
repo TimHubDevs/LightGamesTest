@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5122396179702082727}
   - component: {fileID: 8361700240753141090}
+  - component: {fileID: 4724822232801914980}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -51,9 +52,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardButton: {fileID: 612996777700835365}
   _image: {fileID: 5122396180210796877}
+  _animator: {fileID: 4724822232801914980}
   Name: 
-  rubashkaTexture2D: {fileID: 0}
-  faceTexture2D: {fileID: 0}
+--- !u!95 &4724822232801914980
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5122396179702082726}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 32625e4db5201fe48b7fdf5b3e7081f1, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &5122396180210796875
 GameObject:
   m_ObjectHideFlags: 0
@@ -120,7 +139,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e0a75282fcecb5946ac9ed61eada8da9, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
