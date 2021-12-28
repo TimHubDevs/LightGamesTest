@@ -6,12 +6,12 @@ public class CardSpawner : MonoBehaviour
     [SerializeField] private GameObject _cardPrefab;
     [SerializeField] private Transform _root;
     [SerializeField] private GameManager _gameManager;
-    private Texture2D _rubashkaTexture2D;
+    
     private readonly string NAME_RUBASHKA = "Rubashka";
+    private Texture2D _rubashkaTexture2D;
 
     public void SpawnCard(List<CardInfo> dataCards)
     {
-        Debug.Log("SpawnCard");
         for (var i = 0; i < dataCards.Count; i++)
         {
             if (dataCards[i].Name == NAME_RUBASHKA)
@@ -20,10 +20,10 @@ public class CardSpawner : MonoBehaviour
             }
             else
             {
+                //twice our instance for game ^^
                 InstanceCard(dataCards, i);
                 InstanceCard(dataCards, i);
             }
-
         }
     }
 
@@ -33,9 +33,7 @@ public class CardSpawner : MonoBehaviour
         var card = cardObject.GetComponent<Card>();
         card.Name = dataCards[i].Name;
         Texture2D faceTexture2D = (Texture2D) dataCards[i].Texture;
-        card.faceTexture2D = faceTexture2D;
-        card.rubashkaTexture2D = _rubashkaTexture2D;
-        card.SetupSprite();
+        card.SetupSprite(faceTexture2D, _rubashkaTexture2D);
         int random = Random.Range(0, 6);
         cardObject.transform.SetSiblingIndex(random);
         _gameManager._cards.Add(card);

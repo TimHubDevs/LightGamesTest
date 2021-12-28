@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,10 +7,9 @@ public class Card : MonoBehaviour
 {
     [SerializeField] private Button _cardButton;
     [SerializeField] public Image _image;
+    
     public Action onPressCard;
     public string Name;
-    public Texture2D rubashkaTexture2D;
-    public Texture2D faceTexture2D;
     private Sprite _rubashkaSprite;
     private Sprite _faceSprite;
 
@@ -23,22 +23,35 @@ public class Card : MonoBehaviour
         onPressCard.Invoke();
     }
 
-    public void SetupSprite()
+    public void SetupSprite(Texture2D face, Texture2D rubashka)
     {
-        _rubashkaSprite = Sprite.Create(rubashkaTexture2D, new Rect(0,0, rubashkaTexture2D.width, rubashkaTexture2D.height), Vector2.zero);
-        _faceSprite = Sprite.Create(faceTexture2D, new Rect(0,0, faceTexture2D.width, faceTexture2D.height), Vector2.zero);
+        _rubashkaSprite = Sprite.Create(rubashka, new Rect(0,0, rubashka.width, rubashka.height), Vector2.zero);
+        _faceSprite = Sprite.Create(face, new Rect(0,0, face.width, face.height), Vector2.zero);
         _image.sprite = _rubashkaSprite;
     }
     
     public void ShowCardFace()
     {
-        Debug.Log($"Show Face {Name}");
         _image.sprite = _faceSprite;
     }
 
     public void HideFace()
     {
-        Debug.Log($"Hide Face {Name}");
         _image.sprite = _rubashkaSprite;
+    }
+
+    public void DestroySprite()
+    {
+        _image.sprite = null;
+        _image.color = new Color(1,1,1,0);
+    }
+
+    public IEnumerator FirstHideFace()
+    {
+        _cardButton.enabled = false;
+        _image.sprite = _faceSprite;
+        yield return new WaitForSeconds(5);
+        HideFace();
+        _cardButton.enabled = true;
     }
 }

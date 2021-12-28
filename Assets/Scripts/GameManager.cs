@@ -5,31 +5,36 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    private int pairCount = 0;
+    [SerializeField] private CardSpawner _cardSpawner;
+    [SerializeField] private GameObject _loadingPanel;
+
+    [HideInInspector] 
+    public List<Card> _cards = new List<Card>();
+
+    private int pairCount;
+    private int _countOpenCard;
+    private int _entryCount;
     private int maxPairCount;
     private bool _isCanGame;
-    private List<CardInfo> _cardsInfo = new List<CardInfo>();
-    private List<Card> _openCards = new List<Card>();
-    public List<Card> _cards = new List<Card>();
     private string _firstCardName;
     private string _secondCardName;
-    private int _countOpenCard = 0;
-    private CardSpawner _cardSpawner;
-    CardDownloader cardDownloader = new CardDownloader();
-    private int _entryCount = 0;
+    private List<CardInfo> _cardsInfo = new List<CardInfo>();
+    private List<Card> _openCards = new List<Card>();
 
+    CardDownloader cardDownloader = new CardDownloader();
 
     private void Awake()
     {
-        _cardSpawner = FindObjectOfType<CardSpawner>();
+        _loadingPanel.SetActive(true);
         InitGame();
     }
 
     private void SubscribeCard()
     {
-        Debug.Log("SubscribeCard");
         foreach (var card in _cards)
         {
+            StartCoroutine(card.FirstHideFace());
+            
             card.onPressCard += () =>
             {
                 CheckCountOpenCard();
@@ -50,8 +55,6 @@ public class GameManager : MonoBehaviour
 
     private void InitGame()
     {
-        Debug.Log("InitGame");
-
         if (_entryCount != 1)
         {
             StartCoroutine(DownloadCard());
@@ -65,11 +68,12 @@ public class GameManager : MonoBehaviour
 
     private void InitCardSpawner()
     {
-        Debug.Log("InitCardSpawner");
-
+        _cards.Clear();
         _cardSpawner.SpawnCard(_cardsInfo);
         maxPairCount = _cards.Count / 2;
         SubscribeCard();
+        _loadingPanel.SetActive(false);
+        
     }
 
     public void RestartGame()
@@ -79,7 +83,6 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator DownloadCard()
     {
-        Debug.Log("DownloadCard");
         yield return cardDownloader.GetData(data =>
         {
             foreach (var kvp in data)
@@ -135,33 +138,34 @@ public class GameManager : MonoBehaviour
         {
             //win condition
             pairCount++;
-            Debug.Log($"pairCount {pairCount} +++++ maxPairCount {maxPairCount}");
 
             if (pairCount == maxPairCount)
             {
                 //win
-                Debug.Log("Win ==== Restart");
                 pairCount = 0;
+                foreach (var card in _cards)
+                {
+                    Destroy(card.gameObject);
+                }
+
                 RestartGame();
             }
 
             foreach (var openCard in _openCards)
             {
-                Destroy(openCard.gameObject);
+                openCard.DestroySprite();
             }
 
             _openCards.Clear();
         }
         else if (_secondCardName == String.Empty)
         {
-            Debug.Log("One card");
+            //nothing
         }
         else
         {
             foreach (var openCard in _openCards)
             {
-                Debug.Log("Hide card");
-
                 openCard.HideFace();
             }
 
@@ -178,21 +182,13 @@ public class GameManager : MonoBehaviour
     {
         foreach (var card in _cards)
         {
-            card.onPressCard -= () =>
-            {
-                CheckCountOpenCard();
-
-                if (!_isCanGame)
-                    return;
-
-                card.ShowCardFace();
-
-                _openCards.Add(card);
-
-                FillOpenCardsName(card);
-
-                CheckResult();
-            };
+            card.onPressCard -= () => { };
         }
+    }
+
+    public void Quit()
+    {
+        Debug.Log("Quit");
+        Application.Quit();
     }
 }
